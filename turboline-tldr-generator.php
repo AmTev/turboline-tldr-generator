@@ -5,20 +5,22 @@
  * Version: 1.0
  * Author: Turboline
  * Author URI: https://turboline.ai/
+ * License: GPL v2 or later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ * Version: 6.1
+ * Requires at least: 6.7
+ * Requires PHP: 7.4
  */
 
 defined('ABSPATH') || exit;
 
-// Plugin constants
 define('TLDR_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('TLDR_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('TLDR_META_KEY', 'turboline_tldr_meta_field');
 
-// Include class files
-require_once TLDR_PLUGIN_DIR . 'inc/class.tldr.php';        // TLDR_API
-require_once TLDR_PLUGIN_DIR . 'inc/class.admin.tldr.php';  // Admin settings
+require_once TLDR_PLUGIN_DIR . 'inc/class.tldr.php';
+require_once TLDR_PLUGIN_DIR . 'inc/class.admin.tldr.php';
 
-// Init main plugin class
 new TLDR_Plugin();
 
 // Add settings link to plugin list
@@ -49,7 +51,7 @@ function turboline_enqueue_assets()
 
     wp_enqueue_style(
         'turboline-tldr-css',
-        TLDR_PLUGIN_URL . '/assets/css/turboline-tldr.css', // Path to CSS file
+        TLDR_PLUGIN_URL . '/assets/css/turboline-tldr.css',
         array(),
         '1.0.0',
         'all'
@@ -70,12 +72,7 @@ function turboline_enqueue_assets()
         'nonce' => wp_create_nonce('turboline_nonce'),
     ]);
 }
-// Register shortcode
 add_shortcode('turboline_tldr', 'turboline_tldr_shortcode');
-
-/**
- * Shortcode callback: outputs TLDR excerpt with optional regenerate button.
- */
 function turboline_tldr_shortcode()
 {
     if (!is_singular()) {
@@ -85,30 +82,30 @@ function turboline_tldr_shortcode()
     $post_id = get_the_ID();
     $excerpt = get_post_meta($post_id, TLDR_META_KEY, true);
     $border_color = get_option('tldr_border_color') ?? "#000";
-    // Generate excerpt if missing
     if (empty($excerpt)) {
         $content = get_post_field('post_content', $post_id);
         $excerpt = TLDR_API::generate_excerpt($content);
         update_post_meta($post_id, TLDR_META_KEY, $excerpt);
     }
-
     ob_start();
     ?>
     <div class="turboline-tldr-wrap" style="border-color:<?php echo $border_color ?>">
-    <div class="icon-box">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M12 8V9M12 11.5V16M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#6CBC6E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
+        <div class="icon-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M12 8V9M12 11.5V16M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+                    stroke="#6CBC6E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
 
-    </div>
-    <div>
-    <h3>tl;dr</h3>
-        <div class="turboline-tldr-inner"><?php echo esc_html($excerpt); ?></div>
-        <?php if (current_user_can('manage_options')): ?>
-            <button class="regenerate-tldr-btn" data-post-id="<?php echo esc_attr($post_id); ?>">
-                <i class="fa-solid fa-rotate"></i>
-            </button>
-        <?php endif; ?>
+        </div>
+        <div>
+            <h3>tl;dr</h3>
+            <div class="turboline-tldr-inner"><?php echo esc_html($excerpt); ?></div>
+            <?php if (current_user_can('manage_options')): ?>
+                <button class="regenerate-tldr-btn" data-post-id="<?php echo esc_attr($post_id); ?>">
+                    <i class="fa-solid fa-rotate"></i>
+                </button>
+            <?php endif; ?>
         </div>
     </div>
     <?php
