@@ -1,0 +1,26 @@
+.turboline-tldr-wrap {
+    background: #fff;
+    padding: 1.25rem;
+    box-shadow: 0 5px 17px 0 rgba(0, 0, 0, 0.2);
+    border-left: 5px solid #000;
+    border-radius: 0.5rem;
+	line-height:1.6;
+	font-size: 17px;
+    display:flex;
+    gap:0.8rem;
+}
+.turboline-tldr-wrap .icon-box{
+	margin-top: 7px;
+}
+
+.regenerate-tldr-btn {
+    border: 1px solid #ddd;
+    padding: 0.7rem 1rem;
+    background: transparent;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+    cursor: pointer;
+    display: inline-block;
+    min-width: 1px;
+    min-height: 1px;
+}
