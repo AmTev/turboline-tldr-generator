@@ -51,11 +51,10 @@ class TLDR_Plugin
 
   public function api_key_field_html()
   {
-    $value = esc_attr(get_option('tldr_key'));
     ?>
     <div style="position: relative; display: inline-block;">
-      <input type="password" id="tldr_key" name="tldr_key" value="<?php echo $value; ?>" class="regular-text"
-        style="padding-right: 30px;" />
+      <input type="password" id="tldr_key" name="tldr_key" value="<?php echo esc_attr(get_option('tldr_key')); ?>"
+        class="regular-text" style="padding-right: 30px;" />
       <span id="toggle-tldr-key" class="dashicons dashicons-visibility"
         style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;"></span>
     </div>
@@ -77,8 +76,7 @@ class TLDR_Plugin
 
   public function api_limit_field_html()
   {
-    $value = esc_attr(get_option('tldr_limit'));
-    echo '<input type="text" id="tldr_limit" name="tldr_limit" value="' . $value . '" class="regular-text" />';
+    echo '<input type="text" id="tldr_limit" name="tldr_limit" value="' . esc_attr(get_option('tldr_limit')) . '" class="regular-text" />';
   }
 
   public function border_color_field_html()
