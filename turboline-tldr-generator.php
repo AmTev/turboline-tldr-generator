@@ -7,7 +7,6 @@
  * Author URI: https://turboline.ai/
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Version: 6.1
  * Requires at least: 6.7
  * Requires PHP: 7.4
  */
@@ -21,9 +20,6 @@ define('TLDR_META_KEY', 'turboline_tldr_meta_field');
 require_once TLDR_PLUGIN_DIR . 'inc/class.tldr.php';
 require_once TLDR_PLUGIN_DIR . 'inc/class.admin.tldr.php';
 
-new TLDR_Plugin();
-
-// Add settings link to plugin list
 add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'tldr_add_settings_link');
 function tldr_add_settings_link($links)
 {
@@ -31,6 +27,7 @@ function tldr_add_settings_link($links)
     array_unshift($links, $settings_link);
     return $links;
 }
+
 add_action('admin_enqueue_scripts', function () {
     wp_enqueue_style('wp-color-picker');
     wp_enqueue_script(
@@ -52,7 +49,7 @@ function turboline_enqueue_assets()
     wp_enqueue_style(
         'turboline-tldr-css',
         TLDR_PLUGIN_URL . '/assets/css/turboline-tldr.css',
-        array(),
+        [],
         '1.0.0',
         'all'
     );
@@ -82,21 +79,22 @@ function turboline_tldr_shortcode()
     $post_id = get_the_ID();
     $excerpt = get_post_meta($post_id, TLDR_META_KEY, true);
     $border_color = get_option('tldr_border_color') ?? "#000";
+
     if (empty($excerpt)) {
         $content = get_post_field('post_content', $post_id);
         $excerpt = TLDR_API::generate_excerpt($content);
         update_post_meta($post_id, TLDR_META_KEY, $excerpt);
     }
+
     ob_start();
     ?>
-    <div class="turboline-tldr-wrap" style="border-color:<?php echo $border_color ?>">
+    <div class="turboline-tldr-wrap" style="border-color:<?php echo esc_attr($border_color); ?>">
         <div class="icon-box">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
                     d="M12 8V9M12 11.5V16M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
                     stroke="#6CBC6E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
-
         </div>
         <div>
             <h3>tl;dr</h3>
@@ -111,14 +109,18 @@ function turboline_tldr_shortcode()
     <?php
     return ob_get_clean();
 }
-add_action('wp_ajax_turboline_regenerate_tldr', 'turboline_handle_ajax_regeneration');
 
+add_action('wp_ajax_turboline_regenerate_tldr', 'turboline_handle_ajax_regeneration');
 function turboline_handle_ajax_regeneration()
 {
     check_ajax_referer('turboline_nonce');
 
     if (!current_user_can('manage_options')) {
         wp_send_json_error('Unauthorized');
+    }
+
+    if (!isset($_POST['post_id'])) {
+        wp_send_json_error('Missing post ID');
     }
 
     $post_id = intval($_POST['post_id']);
@@ -149,7 +151,6 @@ function turboline_auto_regenerate_on_save($post_id, $post)
     if (strpos($post->post_content, '[turboline_tldr]') === false) {
         return;
     }
-
     $excerpt = TLDR_API::generate_excerpt($post->post_content);
     update_post_meta($post_id, TLDR_META_KEY, $excerpt);
 }

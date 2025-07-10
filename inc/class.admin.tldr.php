@@ -5,6 +5,23 @@ class TLDR_Plugin
   {
     add_action('admin_menu', array($this, 'add_tldr_admin_menu'));
     add_action('admin_init', array($this, 'tldr_register_settings'));
+    add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_scripts'));
+  }
+
+  public function enqueue_admin_scripts($hook)
+  {
+    if ($hook !== 'settings_page_tldr-settings') {
+      return;
+    }
+    wp_enqueue_script(
+      'vimeo-player',
+      'https://player.vimeo.com/api/player.js',
+      array(),
+      '1.0',
+      true
+    );
+
+    wp_enqueue_style('dashicons');
   }
 
   public function add_tldr_admin_menu()
@@ -91,16 +108,21 @@ class TLDR_Plugin
       return;
     }
 
-    $active_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'settings';
+    $valid_tabs = ['settings', 'documentation'];
+    $active_tab = isset($_GET['tab']) && in_array($_GET['tab'], $valid_tabs, true)
+      ? sanitize_key(wp_unslash($_GET['tab']))
+      : 'settings';
     ?>
     <div class="wrap">
       <h1>TLDR Plugin</h1>
 
       <h2 class="nav-tab-wrapper">
-        <a href="?page=tldr-settings&tab=settings"
-          class="nav-tab <?php echo $active_tab == 'settings' ? 'nav-tab-active' : ''; ?>">Settings</a>
-        <a href="?page=tldr-settings&tab=documentation"
-          class="nav-tab <?php echo $active_tab == 'documentation' ? 'nav-tab-active' : ''; ?>">Docs</a>
+        <a href="<?php echo esc_url(add_query_arg(['page' => 'tldr-settings', 'tab' => 'settings'], admin_url('options-general.php'))); ?>"
+          class="nav-tab <?php echo $active_tab === 'settings' ? 'nav-tab-active' : ''; ?>">Settings</a>
+
+        <a href="<?php echo esc_url(add_query_arg(['page' => 'tldr-settings', 'tab' => 'documentation'], admin_url('options-general.php'))); ?>"
+          class="nav-tab <?php echo $active_tab === 'documentation' ? 'nav-tab-active' : ''; ?>">Docs</a>
+
       </h2>
 
       <?php if ($active_tab == 'settings'): ?>
@@ -181,7 +203,6 @@ class TLDR_Plugin
                 frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
                 style="position:absolute;top:0;left:0;width:100%;height:100%;" title="TL;DR"></iframe>
             </div>
-            <script src="https://player.vimeo.com/api/player.js"></script>
           </div>
         </div>
       <?php endif; ?>
@@ -189,3 +210,5 @@ class TLDR_Plugin
     <?php
   }
 }
+
+new TLDR_Plugin();
